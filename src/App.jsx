@@ -17,8 +17,6 @@ const Slider = ({
         readOnly=false
     }) => {
 
-    console.log(type,label,disabled,readOnly)
-
     return (<div className="field-wrap">
         <label htmlFor={`${type}-slider`}>{label}</label>
         <span className="range-value">{text}</span>
@@ -32,7 +30,7 @@ const Slider = ({
 
 
 
-
+// Since this function is made outside the scope, we curry a function into it
 const copyToClipboard = (fn) => () => {
     let copyElement = document.createElement("textarea");
     copyElement.style.opacity = '0';
@@ -56,6 +54,9 @@ const onFormKeydown = (event) => {
 }
 
 
+const handleChange = fn => event => fn(parseInt(event.target.value, 10));
+
+
 function App() {
     let [copied, setCopied] = useState('');
     
@@ -68,11 +69,7 @@ function App() {
 
     let [password, setPassword] = useState(generatePassword({length,digits,symbols}));
     let [strength, setStrength] = useState(calculateStrength(password));
-
-    let onChangeLength = event => setLength(parseInt(event.target.value, 10));
-    let onChangeDigits = event => setDigits(parseInt(event.target.value, 10));
-    let onChangeSymbols = event => setSymbols(parseInt(event.target.value, 10));
-
+    
     useEffect(() => {
         setStrength(calculateStrength(password));
     }, [password]);
@@ -109,7 +106,7 @@ function App() {
                     min="6"
                     max={maxLength}
                     value={length}
-                    onChange={onChangeLength} />
+                    onChange={handleChange(setLength)} />
 
                 <Slider
                     type="digits"
@@ -118,7 +115,7 @@ function App() {
                     min="0"
                     max={maxDigits}
                     value={digits}
-                    onChange={onChangeDigits} />
+                    onChange={handleChange(setDigits)} />
 
                 <Slider
                     type="symbols"
@@ -127,7 +124,7 @@ function App() {
                     min="0"
                     max={maxSymbols}
                     value={symbols}
-                    onChange={onChangeSymbols} />
+                    onChange={handleChange(setSymbols)} />
             </form>
         </section>
     );
