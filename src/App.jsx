@@ -4,107 +4,127 @@ import generatePassword from './generatePassword.js';
 import React, {useEffect, useState} from 'react';
 import ReactDOM from 'react-dom';
 
+
+const Slider = ({
+        type,
+        label,
+        text,
+        value,
+        min=0,
+        max=100,
+        onChange=()=>{},
+        disabled=false,
+        readOnly=false
+    }) => {
+
+    console.log(type,label,disabled,readOnly)
+
+    return (<div className="field-wrap">
+        <label htmlFor={`${type}-slider`}>{label}</label>
+        <span className="range-value">{text}</span>
+        <div className={`range-slider_wrapper slider-${type} ${text}`}>
+            <span className="slider-bar" style={{width: Math.round((value-min)/(max-min)*100) + '%'}}></span>
+            <input id={`${type}-slider`} type="range" className="range-slider" min={min} max={max}
+                value={value} disabled={disabled} readOnly={readOnly} onChange={onChange} />
+        </div>
+    </div>);
+}
+
+
+
+
+const copyToClipboard = (fn) => () => {
+    let copyElement = document.createElement("textarea");
+    copyElement.style.opacity = '0';
+    copyElement.style.position = 'fixed';
+    copyElement.textContent = password;
+    document.body.appendChild(copyElement);
+    copyElement.select();
+    document.execCommand('copy');
+    document.body.removeChild(copyElement);
+
+    fn(true);
+    setTimeout(() => {
+        fn(false);
+    }, 750);
+}
+
+const onFormKeydown = (event) => {
+    if (event.code === 'Enter') {
+        event.preventDefault();
+    }
+}
+
+
 function App() {
-    let [copied, setCopied] = useState();
-    let [settings, setSettings] = useState({
-        maxLength: 64,
-        maxDigits: 10,
-        maxSymbols: 10,
-        length: 12,
-        digits: 4,
-        symbols: 2,
-        ambiguous: true,
-    });
-    let [password, setPassword] = useState(generatePassword(settings));
+    let [copied, setCopied] = useState('');
+    
+    const maxLength = 64;
+    const maxDigits = 10;
+    const maxSymbols = 10;
+    let [length, setLength] = useState(12);
+    let [digits, setDigits] = useState(4);
+    let [symbols, setSymbols] = useState(2);
+
+    let [password, setPassword] = useState(generatePassword(length,digits,symbols));
     let [strength, setStrength] = useState(calculateStrength(password));
-    let [lengthThumbPosition, setLengthThumbPosition] = useState(0);
-    let [digitsThumbPosition, setDigitsThumbPosition] = useState(0);
-    let [symbolsThumbPosition, setSymbolsThumbPosition] = useState(0);
 
-    function copyToClipboard() {
-        let copyElement = document.createElement("textarea");
-        copyElement.style.opacity = '0';
-        copyElement.style.position = 'fixed';
-        copyElement.textContent = password;
-        document.body.appendChild(copyElement);
-        copyElement.select();
-        document.execCommand('copy');
-        document.body.removeChild(copyElement);
-
-        setCopied(true);
-        setTimeout(() => {
-            setCopied(false);
-        }, 750);
-    }
-
-    function onFormKeydown(event) {
-        if (event.code === 'Enter') {
-            e.preventDefault();
-        }
-    }
-
-    let onChangeLength = event => setSettings({...settings, length: parseInt(event.target.value, 10)});
-    let onChangeDigits = event => setSettings({...settings, digits: parseInt(event.target.value, 10)});
-    let onChangeSymbols = event => setSettings({...settings, symbols: parseInt(event.target.value, 10)});
+    let onChangeLength = event => setLength(parseInt(event.target.value, 10));
+    let onChangeDigits = event => setDigits(parseInt(event.target.value, 10));
+    let onChangeSymbols = event => setSymbols(parseInt(event.target.value, 10));
 
     useEffect(() => {
+        setPassword(generatePassword(length,digits,symbols));
         setStrength(calculateStrength(password));
-    }, [password]);
-
-    useEffect(() => {
-        setLengthThumbPosition(((settings.length - 6) / (settings.maxLength - 6)) * 100);
-        setDigitsThumbPosition(((settings.digits - 0) / (settings.maxDigits - 0)) * 100);
-        setSymbolsThumbPosition(((settings.symbols - 0) / (settings.maxSymbols - 0)) * 100);
-        setPassword(generatePassword(settings));
-    }, [settings]);
+    }, [length,digits,symbols]);
 
     return (
         <section className="wrapper">
             <h1>The Password Genie</h1>
             <div className="password-box">
-                <span id="password" className="password" onClick={copyToClipboard}>{password}</span>
-                <span className="regenerate-password" onClick={() => setPassword(generatePassword(settings))}></span>
-                <span className="copy-password" onClick={copyToClipboard}></span>
+                <span id="password" className="password" onClick={copyToClipboard(setCopied)}>{password}</span>
+                <span className="regenerate-password" onClick={() => setPassword(generatePassword(length,digits,symbols))}></span>
+                <span className="copy-password" onClick={copyToClipboard(setCopied)}></span>
                 {copied && <span className="tooltip">Password copied successfuly!</span>}
             </div>
             <form onKeyDown={onFormKeydown}>
-                <div className="field-wrap">
-                    <label htmlFor="strength-slider">Strength</label>
-                    <span className="range-value">{strength.text}</span>
-                    <div className={`range-slider_wrapper slider-strength ${strength.text}`}>
-                        <span className="slider-bar" style={{width: strength.score + '%'}}></span>
-                        <input id="strength-slider" type="range" className="range-slider" min="0" max="100"
-                            value={strength.score} disabled readOnly />
-                    </div>
-                </div>
+                <Slider
+                    type="strength"
+                    label="Strength"
+                    text={strength.text}
+                    value={strength.score}
+                    disabled={true}
+                    readOnly={true}
+                    />
+
                 <div className="seperator"></div>
-                <div className="field-wrap">
-                    <label htmlFor="length-slider">Length</label>
-                    <span className="range-value">{settings.length}</span>
-                    <div className="range-slider_wrapper">
-                        <span className="slider-bar" style={{width: lengthThumbPosition + '%'}}></span>
-                        <input id="length-slider" type="range" className="range-slider" min="6" max={settings.maxLength}
-                            value={settings.length} onChange={onChangeLength} />
-                    </div>
-                </div>
-                <div className="field-wrap">
-                    <label htmlFor="digits-slider">Digits</label>
-                    <span className="range-value">{settings.digits}</span>
-                    <div className="range-slider_wrapper">
-                        <span className="slider-bar" style={{width: digitsThumbPosition + '%'}}></span>
-                        <input id="digits-slider" type="range" className="range-slider" min="0" max={settings.maxDigits}
-                            value={settings.digits} onChange={onChangeDigits} />
-                    </div>
-                </div>
-                <div className="field-wrap">
-                    <label htmlFor="symbols-slider">Symbols</label>
-                    <span className="range-value">{settings.symbols}</span>
-                    <div className="range-slider_wrapper">
-                        <span className="slider-bar" style={{width: symbolsThumbPosition + '%'}}></span>
-                        <input id="symbols-slider" type="range" className="range-slider" min="0" max={settings.maxSymbols}
-                            value={settings.symbols} onChange={onChangeSymbols} />
-                    </div>
-                </div>
+
+                <Slider
+                    type="length"
+                    label="Length"
+                    text={length}
+                    min="6"
+                    max={maxLength}
+                    value={length}
+                    onChange={onChangeLength} />
+
+                <Slider
+                    type="digits"
+                    label="Digits"
+                    text={digits}
+                    min="0"
+                    max={maxDigits}
+                    value={digits}
+                    onChange={onChangeDigits} />
+
+                <Slider
+                    type="symbols"
+                    label="Symbols"
+                    text={symbols}
+                    min="0"
+                    max={maxSymbols}
+                    value={symbols}
+                    onChange={onChangeSymbols} />
             </form>
         </section>
     );

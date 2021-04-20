@@ -1,10 +1,10 @@
-export default function generatePassword(settings) {
+export default function generatePassword(length,digits,symbols) {
     let lettersSetArray = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
     let symbolsSetArray = [ "=","+","-","^","?","!","%","&","*","$","#","^","@","|"];
     let passwordArray = [];
     let digitsPositionArray = [];
 
-    for (let i = 0; i < settings.length; i++) {
+    for (let i = 0; i < length; i++) {
         digitsPositionArray.push(i);
         let upperCase = Math.round(Math.random() * 1);
         if (upperCase === 0) {
@@ -14,7 +14,7 @@ export default function generatePassword(settings) {
         }
     }
 
-    for (let i = 0; i < settings.digits; i++) {
+    for (let i = 0; i < digits; i++) {
         let digit = Math.round(Math.random() * 9);
         let numberIndex = digitsPositionArray[Math.floor(Math.random() * digitsPositionArray.length)];
 
@@ -25,7 +25,7 @@ export default function generatePassword(settings) {
         }
     }
 
-    for (let i = 0; i < settings.symbols; i++) {
+    for (let i = 0; i < symbols; i++) {
         let symbol = symbolsSetArray[Math.floor(Math.random() * symbolsSetArray.length)];
         let symbolIndex = digitsPositionArray[Math.floor(Math.random() * digitsPositionArray.length)];
 
