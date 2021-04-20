@@ -66,7 +66,7 @@ function App() {
     let [digits, setDigits] = useState(4);
     let [symbols, setSymbols] = useState(2);
 
-    let [password, setPassword] = useState(generatePassword(length,digits,symbols));
+    let [password, setPassword] = useState(generatePassword({length,digits,symbols}));
     let [strength, setStrength] = useState(calculateStrength(password));
 
     let onChangeLength = event => setLength(parseInt(event.target.value, 10));
@@ -74,8 +74,11 @@ function App() {
     let onChangeSymbols = event => setSymbols(parseInt(event.target.value, 10));
 
     useEffect(() => {
-        setPassword(generatePassword(length,digits,symbols));
         setStrength(calculateStrength(password));
+    }, [password]);
+
+    useEffect(() => {
+        setPassword(generatePassword({length,digits,symbols}));
     }, [length,digits,symbols]);
 
     return (
@@ -83,7 +86,7 @@ function App() {
             <h1>The Password Genie</h1>
             <div className="password-box">
                 <span id="password" className="password" onClick={copyToClipboard(setCopied)}>{password}</span>
-                <span className="regenerate-password" onClick={() => setPassword(generatePassword(length,digits,symbols))}></span>
+                <span className="regenerate-password" onClick={() => setPassword(generatePassword({length,digits,symbols}))}></span>
                 <span className="copy-password" onClick={copyToClipboard(setCopied)}></span>
                 {copied && <span className="tooltip">Password copied successfuly!</span>}
             </div>
