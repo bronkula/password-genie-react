@@ -31,7 +31,7 @@ const Slider = ({
 
 
 // Since this function is made outside the scope, we curry a function into it
-const copyToClipboard = (fn) => () => {
+const copyToClipboard = (password,fn) => () => {
     let copyElement = document.createElement("textarea");
     copyElement.style.opacity = '0';
     copyElement.style.position = 'fixed';
@@ -82,9 +82,9 @@ function App() {
         <section className="wrapper">
             <h1>The Password Genie</h1>
             <div className="password-box">
-                <span id="password" className="password" onClick={copyToClipboard(setCopied)}>{password}</span>
+                <span id="password" className="password" onClick={copyToClipboard(password,setCopied)}>{password}</span>
                 <span className="regenerate-password" onClick={() => setPassword(generatePassword({length,digits,symbols}))}></span>
-                <span className="copy-password" onClick={copyToClipboard(setCopied)}></span>
+                <span className="copy-password" onClick={copyToClipboard(password,setCopied)}></span>
                 {copied && <span className="tooltip">Password copied successfuly!</span>}
             </div>
             <form onKeyDown={onFormKeydown}>
